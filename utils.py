@@ -44,6 +44,8 @@ def get_data_yahoo(start,end,index='^GSPC'):
     dfm["fd_nm_close"] = np.array(df.loc[first_days[1:], "Close"])
     dfm["ratio"] = dfm["fd_nm_close"].divide(dfm["fd_cm_close"])
 
+    dfm["mv_avg_3"] = dfm["Close"].rolling(window=3).mean().shift(1)
+    dfm["mv_avg_6"] = dfm["Close"].rolling(window=6).mean().shift(1)
     dfm["mv_avg_12"] = dfm["Close"].rolling(window=12).mean().shift(1)
     dfm["mv_avg_24"] = dfm["Close"].rolling(window=24).mean().shift(1)
     dfm["quot"] = dfm["fd_nm_close"].divide(dfm["fd_cm_close"])
@@ -102,3 +104,36 @@ def yield_net(df, v,tax_cg=0.26,comm_bk=0.01):
     prod = An.prod() * ((1 - comm_bk) ** (2 * n))
 
     return (prod - 1) * 100, ((prod ** (1 / n_years)) - 1) * 100
+
+
+def get_ins(npdata,v):
+    x,y=[],[]
+    for i in range(npdata.shape[0]):
+        if v[i]==1:
+            if i==0:
+                x.append(i)
+                y.append(npdata[i])
+            else:
+                if v[i-1]==0:
+                    x.append(i)
+                    y.append(npdata[i])
+    # df=pd.DataFrame({"index":pd.DatetimeIndex(x),"value":np.array(y)})
+    # df.index=pd.to_datetime(df.index)
+    # df.set_index('index',inplace=True)
+    return x,y
+
+def get_outs(npdata,v):
+    x, y = [], []
+    for i in range(npdata.shape[0]):
+        if v[i] == 0:
+            if i == 0:
+                x.append(i)
+                y.append(npdata[i])
+            else:
+                if v[i - 1] == 1:
+                    x.append(i)
+                    y.append(npdata[i])
+    # df=pd.DataFrame({"index":pd.DatetimeIndex(x),"value":np.array(y)})
+    # df.index=pd.to_datetime(df.index)
+    # df.set_index('index',inplace=True)
+    return x, y

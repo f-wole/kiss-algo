@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ## start included, end excluded ##
-train_start="[1980,1]" # format: (year, month).
-train_end="[2002,10]" # format: (year, month)
+train_start="[1993,1]" # format: (year, month).
+train_end="[2010,10]" # format: (year, month)
 test_start="[2016,3]" # format: (year, month)
 test_end="[2020,7]" # format: (year, month)
 path="trial"
