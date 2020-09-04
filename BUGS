@@ -1,0 +1,14 @@
+OSSERVAZIONI:
+- gross e net yield sembrano corrette, il problema del rendimento negativo sembra essere che gli algo funzionano male!
+
+CONTROLLA:
+- è corretto calcolare così yield? (moltiplico v per nm/cm)? mi sembra di si
+- controlla le medie (nella media a 12 mesi è compreso il mese corrente??)
+- ricontrolla tutto get_data_yahoo
+
+TO DO:
+- bisogna inserire gli in e out marks come in
+http://www.pythonandtrading.com/using-matplotlib-to-identify-trading-signals/
+https://stackoverflow.com/questions/22272081/label-python-data-points-on-plot/22272358
+- aggiungi medie mobili a mesi diversi (3,6,24)
+

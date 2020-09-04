@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ## start included, end excluded ##
-train_start="[1993,1]" # format: (year, month).
-train_end="[2010,10]" # format: (year, month)
-test_start="[2016,3]" # format: (year, month)
-test_end="[2020,7]" # format: (year, month)
+train_start="[1989,1,1]" # format: (year, month, day).
+train_end="[2010,10,17]" # format: (year, month, day)
+test_start="[2012,3,3]" # format: (year, month, day)
+test_end="[2020,7,29]" # format: (year, month, day)
 path="trial"
 train_path=${path}"/data/train"
 test_path=${path}"/data/test"
