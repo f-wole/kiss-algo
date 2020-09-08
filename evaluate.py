@@ -1,4 +1,4 @@
-from utils import yield_net,yield_gross,get_ins,get_outs
+from utils import yield_net,yield_gross,get_ins,get_outs,drawdown
 import sys
 import pickle
 import matplotlib.pyplot as plt
@@ -10,6 +10,8 @@ from scipy import optimize
 data_path=sys.argv[1]
 params_path=sys.argv[2]
 out_path=sys.argv[3]
+fast=int(sys.argv[4])
+slow=int(sys.argv[5])
 
 print("### Starting evaluation of ",out_path)
 
@@ -23,36 +25,38 @@ with open(data_path+"data.pkl","rb") as r:
 with open(params_path,"rb") as r:
     a,b=pickle.load(r)
 
-v=data["Open"]>data["Close_150"]
+# standard KISS
+# v=data["Open"]>data["Close_150"]
+
+# modified KISS
+v=data["Close_fast"]>data["Close_slow"]
+
+
 v_bh=np.ones(v.shape[0])
 
-v_tune = data["Open"] > data["Close_150"] * a + b
+v_tune = data["Close_fast"] > data["Close_slow"] * a + b
 
-with open(out_path+"results.txt","w",encoding="utf8") as w:
-    print("Net yield on data with buy & hold: ",file=w)
-    print("\t total = ",str(yield_net(data,v_bh)[0]),", annual = ",str(yield_net(data,v_bh)[1]),file=w)
-    print("Gross yield on data with buy & hold: ",file=w)
-    print("\t total = ",str(yield_gross(data,v_bh)[0]),", annual = ",str(yield_gross(data,v_bh)[1]),file=w)
-    print("Net yield on data with default KISS: ",file=w)
-    print("\t total = ",str(yield_net(data,v)[0]),", annual = ",str(yield_net(data,v)[1]),file=w)
-    print("Gross yield on data with default KISS: ",file=w)
-    print("\t total = ",str(yield_gross(data,v)[0]),", annual = ",str(yield_gross(data,v)[1]),file=w)
-    print("Net yield on data with tuned KISS: ",file=w)
-    print("\t total = ",str(yield_net(data,v_tune)[0]),", annual = ",str(yield_net(data,v_tune)[1]),file=w)
-    print("Gross yield on data with tuned KISS: ",file=w)
-    print("\t total = ",str(yield_gross(data,v_tune)[0]),", annual = ",str(yield_gross(data,v_tune)[1]),file=w)
+res={}
+res["type"]=["Buy & hold","Simple Kiss","Tuned Kiss"]
+res["Total Gross Yield"]=[yield_gross(data,v_bh)[0],yield_gross(data,v)[0],yield_gross(data,v_tune)[0]]
+res["Total Net Yield"]=[yield_net(data,v_bh)[0],yield_net(data,v)[0],yield_net(data,v_tune)[0]]
+res["Annual Gross Yield"]=[yield_gross(data,v_bh)[1],yield_gross(data,v)[1],yield_gross(data,v_tune)[1]]
+res["Annual Net Yield"]=[yield_net(data,v_bh)[1],yield_net(data,v)[1],yield_net(data,v_tune)[1]]
+res["Max Drawdown %"]=[drawdown(data,v_bh),drawdown(data,v),drawdown(data,v_tune)]
+df=pd.DataFrame(res)
+df.to_excel(out_path+"results.xlsx",index=False)
 
 npdata=np.array(data["Open"])
-npmean=np.array(data["Close_150"])
-npmean1=np.array(data["em_150"])
-npmean2=np.array(data["mv_150"])
+npdataclose=np.array(data["Close"])
+npmeanfast=np.array(data["Close_fast"])
+npmeanslow=np.array(data["Close_slow"])
 plt.close()
 plt.figure(figsize=(35,10))
 
 plt.plot(npdata, label="Open")
-plt.plot(npmean,label="dema_150")
-plt.plot(npmean1,label="em_150")
-plt.plot(npmean2,label="mv_150")
+# plt.plot(npdataclose, label="Close")
+plt.plot(npmeanfast,label="mean "+str(fast))
+plt.plot(npmeanslow,label="mean "+str(slow))
 plt.plot(get_ins(npdata,v)[0],get_ins(npdata,v)[1],'^', markersize=10, color='g',label="default KISS in")
 plt.plot(get_outs(npdata,v)[0],get_outs(npdata,v)[1],'v', markersize=10, color='r',label="default KISS out")
 plt.plot(get_ins(npdata,v_tune)[0],get_ins(npdata,v_tune)[1],'^', markersize=10, color='b',label="tuned KISS in")
@@ -61,5 +65,5 @@ plt.plot(get_outs(npdata,v_tune)[0],get_outs(npdata,v_tune)[1],'v', markersize=1
 plt.legend(fontsize=20)
 plt.grid(axis="both")
 plt.title("data",fontsize=25)
-plt.xticks(np.arange(v.shape[0]),data.index,rotation=45)
+plt.xticks(np.arange(v.shape[0])[::10],data.index.strftime("%d/%m/%Y")[::10],rotation=90)
 plt.savefig(out_path+"plot")

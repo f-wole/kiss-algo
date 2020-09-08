@@ -19,7 +19,7 @@ with open(train_path+"data.pkl","rb") as r:
 
 def tune(z):
     a,b=z
-    v=train["Open"]>train["Close_150"]*a+b
+    v=train["Close_fast"]>train["Close_slow"]*a+b
     return -yield_net(train,v)[0]
 rranges = (slice(-1, 2, 0.1), slice(-1, 2, 0.1))
 resbrute = optimize.brute(tune, rranges, full_output=True, finish=optimize.fmin)

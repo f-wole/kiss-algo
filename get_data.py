@@ -9,6 +9,8 @@ start=json.loads(sys.argv[1]) # format: (year, month) included
 end=json.loads(sys.argv[2]) # format: (year, month) excluded
 save_path=sys.argv[3]
 index=sys.argv[4]
+fast=int(sys.argv[5])
+slow=int(sys.argv[6])
 
 if not save_path.endswith("/"):
     save_path+="/"
@@ -16,7 +18,7 @@ if not save_path.endswith("/"):
 # FIX DATES
 dfm=get_data_yahoo([start[0],start[1],start[2]],
                    [end[0],end[1],end[2]],
-                   index)
+                   index, fast, slow)
 
 
 with open(save_path+"data.pkl","wb") as w:

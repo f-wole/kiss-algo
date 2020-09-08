@@ -2,6 +2,7 @@ import numpy as np
 import datetime
 import pickle
 import pandas as pd
+import matplotlib.pyplot as plt
 import pandas_datareader as pdr
 from keras.models import Sequential
 from keras.optimizers import RMSprop,Adam
@@ -9,7 +10,7 @@ from keras.layers import Dense,Dropout,BatchNormalization,Conv1D,Flatten,MaxPool
 from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 
-def get_data_yahoo(start,end,index='^GSPC'):
+def get_data_yahoo(start,end,index='^GSPC',fast=20,slow=300):
 
     # input format: (year, day, month)
 
@@ -20,19 +21,24 @@ def get_data_yahoo(start,end,index='^GSPC'):
     df.drop(to_drop, axis=1, inplace=True)
 
     df["weekday"] = df.index.weekday  # The day of the week with Monday=0, Sunday=6.
-    # df["Close_5"] = df["Close"].rolling(window=5).mean().shift(1)
-    # df["Close_30"] = df["Close"].rolling(window=30).mean().shift(1)
-    # df["Close_150"] = df["Close"].rolling(window=150).mean().shift(1)
 
-    # df["Close_150"] = df["Close"].ewm(span=150, adjust=False).mean().shift(1)
+    df["Close_fast"] = df["Close"].ewm(span=fast, adjust=False).mean().shift(1)
+    df["Close_slow"] = df["Close"].ewm(span=slow, adjust=False).mean().shift(1)
 
-    df["em_150"] = df["Close"].ewm(span=150, adjust=False).mean().shift(1)
-    df["Close_150"] =2*df["em_150"]- df["em_150"].ewm(com=0.5,adjust=False).mean().shift(1)
+    # DEMA
+    # df["em_150"] = df["Close"].ewm(span=150, adjust=False).mean().shift(1)
+    # df["Close_150"] =2*df["em_150"]- df["em_150"].ewm(com=0.5,adjust=False).mean().shift(1)
 
-    df["mv_150"] = df["Close"].rolling(window=150).mean().shift(1)
+    # OLD
+    # df["mv_150"] = df["Close"].rolling(window=150).mean().shift(1)
 
-    df = df[150:]
+    df = df[slow:]
     df = df.loc[df["weekday"] == 0]
+
+    ## DELTA
+    # df["delta2"] = (df["Close"] - (df["Close"].shift(2)))/(df["Close"].shift(2))
+    # df.loc[[df.index[0],df.index[1]],"delta2"]=0
+
     df["Open next"] = df["Open"].shift(-1)
     df["quot"] = df["Open next"] / df["Open"]
     df=df[:-1]
@@ -85,6 +91,12 @@ def yield_net(df, v,tax_cg=0.26,comm_bk=0.001):
     res=(prod - 1) * 100, ((prod ** (1 / n_years)) - 1) * 100
     return res
 
+def drawdown(df,v):
+    portfolio=[yield_net(df[:i],v[:i])[0]/100 +1 for i in range(1,v.shape[0])]
+    # print(portfolio)
+    # print([portfolio[:i] for i,x in enumerate(portfolio[1:])])
+    draw=[x/(max(portfolio[:i+1])) for i,x in enumerate(portfolio)]
+    return (1-min(draw))*100
 
 def get_ins(npdata,v):
     x,y=[],[]
