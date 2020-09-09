@@ -1,10 +1,7 @@
+## Keep It Simple, Stupid
+
 This repository contains code to perform mean-reversion technique on an index.
-
-Keep  
-It  
-Simple,  
-Stupid  
-
+ 
 Mean-reversion is performed using weighted exponential moving averages.
 Code can be run using *tune_eval.sh*.
 
