@@ -36,8 +36,8 @@ def get_data_yahoo(start,end,index='^GSPC',fast=20,slow=300):
     df = df.loc[df["weekday"] == 0]
 
     ## DELTA
-    # df["delta2"] = (df["Close"] - (df["Close"].shift(2)))/(df["Close"].shift(2))
-    # df.loc[[df.index[0],df.index[1]],"delta2"]=0
+    df["delta2"] = (df["Close"] - (df["Close"].shift(2)))/(df["Close"].shift(2))
+    df.loc[[df.index[0],df.index[1]],"delta2"]=0
 
     df["Open next"] = df["Open"].shift(-1)
     df["quot"] = df["Open next"] / df["Open"]
@@ -90,6 +90,38 @@ def yield_net(df, v,tax_cg=0.26,comm_bk=0.001):
     prod = An.prod() * ((1 - comm_bk) ** (2 * n))
     res=(prod - 1) * 100, ((prod ** (1 / n_years)) - 1) * 100
     return res
+
+def select_first_one(v):
+    v1=np.array([0]+list(v[:-1]))
+    return np.maximum(0,v-v1)
+
+def remove_first_1s(lista):
+    lista=np.array(lista)
+    if lista[0] == 0:
+        return lista
+    else:
+        if (1-lista).nonzero()[0]!=[]:
+            ind_0=(1-lista).nonzero()[0][0]
+            res=np.array(([0]*ind_0)+list(lista[ind_0:]))
+            assert res.shape==lista.shape
+            return res
+        else:
+            return np.zeros(lista.shape[0])
+
+
+def add_max_loss(v,loss):
+    indices=[0]+list(loss.nonzero()[0])+[len(v)]
+    if len(indices)<=2:
+        return v
+    else:
+        pieces=[v[indices[i]:indices[i+1]] for i in range(len(indices)-1)]
+        res=list(pieces[0])
+        for piece in pieces[1:]:
+            res+=list(remove_first_1s(piece))
+        res=np.array(res)
+        assert res.shape==v.shape
+        return res
+
 
 def drawdown(df,v):
     portfolio=[yield_net(df[:i],v[:i])[0]/100 +1 for i in range(1,v.shape[0])]

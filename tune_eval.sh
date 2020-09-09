@@ -9,6 +9,7 @@ index="^GSPC"
 path="trial"
 fast="100"
 slow="300"
+max_loss="-0.125" # if "no" then no max_loss is applied
 train_path=${path}"/data/train"
 test_path=${path}"/data/test"
 training_path=${path}"/training"
@@ -23,6 +24,6 @@ mkdir -p ${evaluate_train}
 mkdir -p ${evaluate_test}
 python get_data.py ${train_start} ${train_end} ${train_path} ${index} ${fast} ${slow}
 python get_data.py ${test_start} ${test_end} ${test_path} ${index} ${fast} ${slow}
-python tune.py ${train_path} ${training_path}"/params.pkl"
-python evaluate.py ${train_path} ${training_path}"/params.pkl" ${evaluate_train} ${fast} ${slow}
-python evaluate.py ${test_path} ${training_path}"/params.pkl" ${evaluate_test} ${fast} ${slow}
+python tune.py ${train_path} ${training_path}"/params.pkl" ${max_loss}
+python evaluate.py ${train_path} ${training_path}"/params.pkl" ${evaluate_train} ${fast} ${slow} ${max_loss}
+python evaluate.py ${test_path} ${training_path}"/params.pkl" ${evaluate_test} ${fast} ${slow} ${max_loss}
