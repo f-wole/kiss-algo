@@ -7,4 +7,5 @@ Mean-reversion is performed using weighted exponential moving averages. It is po
 Code can be run using *tune_eval.sh*.
 
 Future developments:  
+- add another moving_average for further control: buy-signal: 10-period MA crosses over 50-period MA AND the price is above the 200-period MA. Similar for the sell-signal.
 - differentiate periods of moving averages for in and out signals
